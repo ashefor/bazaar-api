@@ -4,14 +4,6 @@ const jwt = require('jsonwebtoken');
 const cryto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// const transporter = nodemailer.createTransport({
-//     host: "smtp.zeptomail.com",
-//     port: 465,
-//     auth: {
-//         user: "emailapikey",
-//         pass: "wSsVR611rBShB6p5yjGrJe5qy1sDA1ilQEp9iVfzuSP4SvyX98c5kkbOVAWmGvIbQG9tFmEUoLN/yhoI2jRciNstywkIXiiF9mqRe1U4J3x17qnvhDzKVm9emxqMLooLwwRtmmdgFMwh+g=="
-//     }
-// });
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -25,8 +17,8 @@ const transporter = nodemailer.createTransport({
 //     host: "sandbox.smtp.mailtrap.io",
 //     port: 2525,
 //     auth: {
-//         user: "99ed50d2f24f48",
-//         pass: "a62676e7f0045b"
+//         user: process.env.MAILTRAP_USER,
+//         pass: process.env.MAILTRAP_PASSWORD
 //     }
 // })
 
