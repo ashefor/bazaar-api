@@ -19,7 +19,7 @@ exports.initiateOrder = async (req, res, next) => {
             email: req.user.email,
             amount: shipping.total * 100,
             reference,
-            callback_url: `${process.env.CALLBACK_URL}/${reference}`,
+            callback_url: `${process.env.CALLBACK_URL}`,
             metadata: {
                 shipping,
                 items,
@@ -93,23 +93,37 @@ exports.verifyAndCreateOrder = async (req, res, next) => {
             res.on('end', async() => {
                 const reqData = JSON.parse(data);
                 const innerData = reqData.data;
-                // console.log(innerData.metadata.items);
-                order = new Order({
-                    items: [...innerData.metadata.items],
-                    user: innerData.metadata.user.userId,
-                    shipping: innerData.metadata.shipping
-                });
+              try {
+                if (!innerData) {
+                    const error = new Error('Transaction not found/valid');
+                    error.statusCode = 400;
+                    throw error
+                }
+                let order = await Order.findOne({ trx_ref: reference, user: innerData.metadata.user.userId }).exec();
+                if (!order) {
+                    order = new Order({
+                        items: [...innerData.metadata.items],
+                        user: innerData.metadata.user.userId,
+                        shipping: innerData.metadata.shipping,
+                        trx_ref: reference
+                    });
+                }
                 await order.save();
                 await order.populate('items.product');
-
                 resp.status(201).json({
                     message: 'Order created successfully',
                     order
                 })
+              } catch (error) {
+                if (!error.statusCode) {
+                    error.statusCode = 500
+                };
+                next(error)
+              }
             })
         }).on('error', error => {
             // console.error(error);
-            next(error)
+            throw error
         })
         paystackReq.end();
     } catch (error) {

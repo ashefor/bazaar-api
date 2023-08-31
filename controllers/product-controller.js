@@ -1,11 +1,11 @@
 const Product = require('../models/product');
+const slugify = require('slugify')
 const { validationResult } = require('express-validator');
+const crypto = require('crypto');
 
 exports.addProduct = async (req, res, next) => {
     const errors = validationResult(req);
     const files = req.files;
-    let productSizes;
-    let productColors;
     const { product_name, product_description, product_price, product_category } = req.body;
     try {
         if (!errors.isEmpty()) {
@@ -29,12 +29,6 @@ exports.addProduct = async (req, res, next) => {
         //   });
         const mainImageUrl = files[0].path;
         const productImages = files.slice(1).map((file) => file.path);
-        // const sizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
-        // const colors = ['black', 'white', 'gray'];
-        // if (product_category === 'clothing' || product_category === 'shoes') {
-        //     productSizes = sizes;
-        //     productColors = colors;
-        // }
         const product = new Product({
             main_image: mainImageUrl,
             product_images: productImages,
@@ -62,13 +56,19 @@ exports.getProducts = async (req, res, next) => {
     const perPage = req.query.page_size || 12;
     try {
         let totalItems = await Product.countDocuments().exec();
+        let totalPages = Math.ceil(totalItems / perPage)
+        let pageStart = (currentPage - 1) * perPage + 1
+        let pageLimit = perPage * (currentPage) > totalItems ? totalItems : perPage * (currentPage);
         const products = await Product.find().skip((currentPage - 1) * perPage).limit(perPage).exec();
         res.status(200).json({
             message: 'Fetched products successfully',
             products: products,
             currentPage: currentPage,
             totalItems: totalItems,
-            totalPages: Math.ceil(totalItems / perPage)
+            totalPages: totalPages,
+            pageLimit: pageLimit,
+            pageStart: pageStart,
+            pageSize: perPage
         })
     } catch (error) {
         if (!error.statusCode) {
@@ -79,7 +79,7 @@ exports.getProducts = async (req, res, next) => {
 }
 
 exports.getSingleProduct = async (req, res, next) => {
-    const productId = req.params.productId;
+    const product_slug = req.params.product_slug;
     const errors = validationResult(req);
     try {
         if (!errors.isEmpty()) {
@@ -87,7 +87,7 @@ exports.getSingleProduct = async (req, res, next) => {
             error.statusCode = 422;
             throw error
         }
-        const product = await Product.findById(productId).exec();
+        const product = await Product.findOne({product_slug: product_slug}).exec();
         if (!product) {
             const error = new Error('Could not find product');
             error.statusCode = 404;

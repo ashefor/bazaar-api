@@ -1,5 +1,5 @@
 const { Schema, default: mongoose } = require("mongoose");
-
+const crypto = require("crypto");
 const productSchema = new Schema({
     product_name: {
         type: Schema.Types.String,
@@ -16,6 +16,14 @@ const productSchema = new Schema({
     product_size: {
         type: Schema.Types.String,
         default: 'S'
+    },
+    product_slug: {
+        type: Schema.Types.String,
+        default: 'product-name'
+    },
+    product_code: {
+        type: Schema.Types.String,
+        required: true,
     },
     product_color: {
         type: Schema.Types.String,

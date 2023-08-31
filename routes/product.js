@@ -13,6 +13,6 @@ router.post('/', [
 
 router.get('/', productController.getProducts);
 
-router.get('/:productId', check('productId').notEmpty().trim().isMongoId(), productController.getSingleProduct);
+router.get('/:product_slug', check('product_slug').notEmpty().trim(), productController.getSingleProduct);
 
 module.exports = router

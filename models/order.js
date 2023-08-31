@@ -6,6 +6,10 @@ const orderSchema = new Schema({
         ref: 'User',
         required: true
     },
+    trx_ref: {
+        type: String,
+        required: true
+    },
     items: [
         {
             product: {
