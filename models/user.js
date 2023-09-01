@@ -10,11 +10,6 @@ const userSchema = new Schema({
         type: Schema.Types.Boolean,
         default: false
     },
-    accountId: {
-        type: Schema.Types.String,
-        required: true,
-        unique: true
-    },
     password: {
         type: Schema.Types.String,
         required: true,

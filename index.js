@@ -24,6 +24,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(fileUploadMiddleWare)
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

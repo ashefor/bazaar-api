@@ -2,6 +2,7 @@ const express = require('express');
 const { body, check } = require('express-validator');
 const User = require('../models/user');
 const authController = require('../controllers/auth-controller');
+const isAuth = require('../middlewares/is-auth');
 
 const router = express.Router();
 
@@ -47,5 +48,16 @@ router.get('/verify-email/:token/:email',[
 router.get('/resend-verify-email/:email',[
     check('email', 'Email is invalid').trim().isEmail().normalizeEmail()
 ], authController.resendVerificationEmail);
+
+router.post('/change-password', isAuth, [
+    body('old_password').trim().isLength({ min: 6 }).isAlphanumeric().withMessage('Password must be at least 6 characters long'),
+    body('new_password').trim().isLength({ min: 6 }).isAlphanumeric().withMessage('Password must be at least 6 characters long'),
+    body('confirm_password').custom((value, { req }) => {
+        if (value !== req.body.new_password) {
+            throw new Error('Passwords have to match!');
+        }
+        return true
+    }),
+], authController.changePassword)
 
 module.exports = router;

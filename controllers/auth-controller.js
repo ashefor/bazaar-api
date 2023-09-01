@@ -18,7 +18,7 @@ const { validationResult } = require('express-validator');
 
 const sendMail = async (token, email) => {
     const mailOptions = {
-        from: '"Customer service" <help@bazaar.cptshredder.com>',
+        from: '"The Bazaar Team" <help@bazaar.cptshredder.com>',
         to: email,
         subject: `Welcome to ${process.env.COMPANY_NAME} - Your Signup Was Successful! Verify Your Account Now`,
         html: `
@@ -237,7 +237,7 @@ exports.resetPassword = async (req, res, next) => {
                 message: 'Password reset link sent',
             })
             const mailOptions = {
-                from: '"Customer service" <help@bazaar.cptshredder.com>',
+                from: '"The Bazaar Team" <help@bazaar.cptshredder.com>',
                 to: email,
                 subject: `Password Reset Request - ${process.env.COMPANY_NAME}`,
                 html: `
@@ -327,7 +327,7 @@ exports.setNewPassword = async (req, res, next) => {
             message: 'Password successfully changed',
         })
         const mailOptions = {
-            from: '"Customer service" <help@bazaar.cptshredder.com>',
+            from: '"The Bazaar Team" <help@bazaar.cptshredder.com>',
             to: email,
             subject: `Password Reset Successful - ${process.env.COMPANY_NAME}`,
             html: `
@@ -356,6 +356,42 @@ exports.setNewPassword = async (req, res, next) => {
             }
             console.log('Email Sent');
         });
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500
+        };
+        next(error);
+    }
+}
+
+exports.changePassword = async(req, res, next) => {
+    const errors = validationResult(req);
+    const { old_password, new_password } = req.body;
+    try {
+        if (!errors.isEmpty()) {
+            const error = new Error('Validation Failed');
+            error.statusCode = 422;
+            error.data = errors.array();
+            throw error
+        }
+        const user = await User.findOne({ _id: req.user.userId }).exec();
+        if (!user) {
+            const error = new Error('User not found');
+            error.statusCode = 401;
+            throw error
+        }
+        const isEqual = await brcrypt.compare(old_password, user.password)
+        if (!isEqual) {
+            const error = new Error('Wrong password');
+            error.statusCode = 403;
+            throw error
+        }
+        const hashedPw = await brcrypt.hash(new_password, 12);
+        user.password = hashedPw;
+        await user.save();
+        res.status(200).json({
+            message: 'Password successfully changed',
+        })
     } catch (error) {
         if (!error.statusCode) {
             error.statusCode = 500

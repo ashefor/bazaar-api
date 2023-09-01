@@ -2,6 +2,19 @@ const https = require('https');
 const crypto = require('crypto');
 const Order = require('../models/order');
 const User = require('../models/user');
+const fs = require('graceful-fs').promises;
+const ejs = require('ejs');
+const nodemailer = require('nodemailer');
+const easyinvoice = require('easyinvoice');
+const path = require('path');
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD
+    }
+});
 
 exports.initiateOrder = async (req, res, next) => {
     const { items, shipping } = req.body;
@@ -90,36 +103,44 @@ exports.verifyAndCreateOrder = async (req, res, next) => {
                 data += chunk
             });
 
-            res.on('end', async() => {
+            res.on('end', async () => {
                 const reqData = JSON.parse(data);
                 const innerData = reqData.data;
-              try {
-                if (!innerData) {
-                    const error = new Error('Transaction not found/valid');
-                    error.statusCode = 400;
-                    throw error
+                try {
+                    if (!innerData) {
+                        const error = new Error('Transaction not found/valid');
+                        error.statusCode = 400;
+                        throw error
+                    }
+                    let order = await Order.findOne({ trx_ref: reference, user: innerData.metadata.user.userId }).exec();
+                    if (!order) {
+                        order = new Order({
+                            items: [...innerData.metadata.items],
+                            user: innerData.metadata.user.userId,
+                            shipping: innerData.metadata.shipping,
+                            trx_ref: reference
+                        });
+                        await order.save();
+                        await order.populate(['items.product', 'user']);
+                        resp.status(200).json({
+                            message: 'Order created successfully',
+                            order
+                        })
+                        await sendOrderMail(order);
+                    } else {
+                        await order.populate(['items.product', 'user']);
+                        resp.status(200).json({
+                            message: 'Order created successfully',
+                            order
+                        })
+                    }
+
+                } catch (error) {
+                    if (!error.statusCode) {
+                        error.statusCode = 500
+                    };
+                    next(error)
                 }
-                let order = await Order.findOne({ trx_ref: reference, user: innerData.metadata.user.userId }).exec();
-                if (!order) {
-                    order = new Order({
-                        items: [...innerData.metadata.items],
-                        user: innerData.metadata.user.userId,
-                        shipping: innerData.metadata.shipping,
-                        trx_ref: reference
-                    });
-                }
-                await order.save();
-                await order.populate('items.product');
-                resp.status(201).json({
-                    message: 'Order created successfully',
-                    order
-                })
-              } catch (error) {
-                if (!error.statusCode) {
-                    error.statusCode = 500
-                };
-                next(error)
-              }
             })
         }).on('error', error => {
             // console.error(error);
@@ -136,7 +157,7 @@ exports.verifyAndCreateOrder = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
     try {
-        const orders = await Order.find({ user: req.user.userId }).populate('items.product').exec();
+        const orders = await Order.find({ user: req.user.userId }).populate(['items.product', 'user']).exec();
         res.status(200).json({
             message: 'Fetched orders successfully',
             orders
@@ -148,3 +169,98 @@ exports.getOrders = async (req, res, next) => {
         next(error)
     }
 }
+
+exports.viewInvoice = async (req, res, next) => {
+    const { order_id } = req.params
+    try {
+        const order = await Order.findOne({ _id: order_id }).populate(['items.product', 'user']).exec();
+        const fileName = await createInvoiceMail(order);
+        res.status(200).json({
+            link: `${req.protocol}://${req.get('host')}/invoices/${fileName}`
+        })
+    } catch (error) {
+        if (!error.statusCode) {
+            error.statusCode = 500
+        };
+        next(error)
+    }
+}
+
+const createInvoiceMail = async (order) => {
+    try {
+        const data = {
+            "images": {
+                "logo": "https://bazaar.cptshredder.com/assets/images/ecommerce.png",
+            },
+            "sender": {
+                "company": "Bazaar",
+                "address": "Sample Street 123",
+                "zip": "1234 AB",
+                "city": "Lagos",
+                "country": "Nigeria"
+            },
+            "client": {
+                "company": `${order.user.first_name} ${order.user.last_name}`,
+                "address": order.shipping.address,
+                "zip": "4567 CD",
+                "city": "Lagos",
+                "country": "Nigeria"
+            },
+            "information": {
+                "number": order._id,
+                "date": new Date(order.createdAt).toDateString(),
+            },
+            "products": order.items.map(item => {
+                return {
+                    "description": item.product.product_name,
+                    "quantity": item.quantity,
+                    "price": item.product.product_price,
+                    "tax-rate": 0
+                }
+            }),
+            "total": order.shipping.total,
+            "bottom-notice": "Thank you for shopping with us",
+            "settings": {
+                "currency": "NGN",
+            },
+        };
+        const fileName = order._id + '.pdf';
+        const filePath = path.join(__dirname, `../invoices/${fileName}`);
+        const result = await easyinvoice.createInvoice(data);
+        await fs.writeFile(filePath, result.pdf, 'base64');
+        return fileName;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const sendOrderMail = async (orderDetails) => {
+    try {
+        console.log(orderDetails)
+        const fileName = await createInvoiceMail(orderDetails);
+        const emailTemplate = await fs.readFile('./templates/order-email.ejs', 'utf8');
+        const compiledTemplate = ejs.compile(emailTemplate);
+        const html = compiledTemplate({
+            invoice: orderDetails,
+            link: `${process.env.NODE_ENV != 'production' ? process.env.BASE_URL_DEV : process.env.BASE_URL_PROD}/invoices/${fileName}`
+        })
+        const filePath = path.join(__dirname, `../invoices/${fileName}`);
+        const mailOptions = {
+            from: '"The Bazaar Team" <order@bazaar.cptshredder.com>',
+            to: orderDetails.user.email,
+            subject: `Invoice for Order #${orderDetails._id}`,
+            html: html,
+            attachments: [
+                {
+                    filename: fileName,
+                    path: filePath
+                }
+            ]
+        };
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        const err = new Error(error);
+        throw (err);
+    }
+}
+

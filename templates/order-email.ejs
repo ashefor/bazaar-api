@@ -1,0 +1,86 @@
+<table cellspacing="0" cellpadding="0" style="background-color: #F2F2F2; width: 100%;">
+    <tbody>
+        <tr>
+            <td>
+                <div
+                    style="background-color: #fff; border: 1px solid #eee; box-sizing: border-box; font-family: Lato, Helvetica, 'Helvetica Neue', Arial, 'sans-serif'; margin: 40px auto; max-width: 600px; overflow: hidden; width: 600px;">
+                    <div style="border-top: 6px solid #000;">
+                        <div style="padding: 40px 65px; text-align: center;">
+                            <h4 style="font-size: 24px; text-transform: capitalize; margin: 0;">Your Bazaar Receipt</h4>
+                        </div>
+                        <div style="height: 1px;">
+                            <div
+                                style="width: 100%;height: 1px; background-image: linear-gradient(to right, #C3C3C3 80%, transparent 20%); background-size: 20px 100%;">
+                            </div>
+                        </div>
+                        <div style="font-size: 14px; padding: 40px 65px;">
+                            <p style="margin: 0; line-height: 22px;">Hi <%= invoice.user.first_name %>,</p>
+                            <h4
+                                style="color: #253745; font-size: 18px; margin: 0; margin: 25px 0 40px 0; text-align: center;">
+                                Thank you for your order!</h4>
+                            <div style="align-items: center; display: flex; line-height: 22px; margin-bottom: 25px;">
+                                <label style="width: 75px; word-break: break-word;">Order ID</label><span style="margin: 0 10px;">:</span>
+                                <div> <%=invoice._id%> </div>
+                            </div>
+                            <div style="align-items: center; display: flex; line-height: 22px; margin-bottom: 35px;">
+                                <label style="width: 75px; word-break: break-word;">Order Date</label><span style="margin: 0 10px;">:</span>
+                                <div style="display: inline-flex;"> <%= new Date(invoice.createdAt).toDateString() %> </div>
+                            </div>
+                            <table
+                                style="border-collapse: collapse; font-size: 14px; margin-bottom: 30px; width: 100%;">
+                                <tbody>
+                                    <tr style="background-color: #F8F8F8;">
+                                        <td
+                                            style=" border: 2px solid #fff; padding: 20px; word-break: break-word; line-height: 22px;">
+                                            Product</td>
+                                        <td
+                                            style=" border: 2px solid #fff; padding: 20px; word-break: break-word; line-height: 22px;">
+                                            Amount</td>
+                                            <td
+                                            style=" border: 2px solid #fff; padding: 20px; word-break: break-word; line-height: 22px;">
+                                            Quantity</td>
+                                    </tr>
+                                    <% invoice.items.forEach(item => { %>
+                                        <tr style="background-color: #F2F2F2;">
+                                            <td
+                                                style=" border: 2px solid #fff; padding: 20px; word-break: break-word; line-height: 22px;">
+                                                <strong> <%=item.product.product_name%></strong></td>
+                                            <td
+                                                style=" border: 2px solid #fff; padding: 20px; word-break: break-word; line-height: 22px;">
+                                                <strong> ₦<%= new Intl.NumberFormat().format(item.product.product_price)%></strong></td>
+                                                <td
+                                                style=" border: 2px solid #fff; padding: 20px; word-break: break-word; line-height: 22px;">
+                                                <strong> <%=item.quantity%> </strong></td>
+                                        </tr>
+                                        <%}) %>
+                                </tbody>
+                            </table>
+                            <div style="display: flex; margin-bottom: 30px;">
+                                <div style="color: #253745; font-size: 18px;"><label>Total :</label>
+                                </div>
+                                <div style="margin-left: auto;">
+                                    <span href="{{setreminder_link}}"
+                                        style="background: none; border: none; display: inline-block; text-decoration: none; padding: 0; font-size: 18px; font-weight: 900;">₦<%= new Intl.NumberFormat().format(invoice.shipping.total)%></span>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 30px;">
+                                <p style="color: #253745; font-size: 14px; margin: 0; line-height: 22px;">Delivery details:</p>
+                            <p style="color: #253745; font-size: 14px; margin: 0; line-height: 22px;"><%= invoice.shipping.address%></p>
+                            <p style="color: #253745; font-size: 14px; margin: 0; line-height: 22px; text-transform: capitalize;"><%= invoice.shipping.delivery_type%> delivery</p>
+                            <p style="color: #253745; font-size: 14px; margin: 0; line-height: 22px;">₦<%= new Intl.NumberFormat().format(invoice.shipping.delivery)%></p>
+                            </div>
+                            <div style="text-align: center; margin: 35px 0 30px;">
+                                <a href="<%= link %>"
+                                    style="background: none; border: 2px solid #000; border-radius: 4px; cursor: pointer; display: inline-block; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 24px;">View
+                                    Invoice</a>
+                            </div>
+                            <p style="color: #253745; font-size: 14px; margin: 0; line-height: 22px;">Thank you,</p>
+                            <p style="color: #253745; font-size: 14px; margin: 0; line-height: 22px;">Team Bazaar</p>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+    </tbody>
+</table>
