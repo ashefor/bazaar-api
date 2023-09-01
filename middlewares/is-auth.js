@@ -12,8 +12,9 @@ module.exports = (req, res, next) => {
     try {
         decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-        error.statusCode = 403;
-        throw error;
+        const err = new Error('Session has expired')
+        err.statusCode = 401;
+        throw err;
     }
 
     if(!decodedToken) {
