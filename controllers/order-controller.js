@@ -187,6 +187,7 @@ exports.viewInvoice = async (req, res, next) => {
 }
 
 const createInvoiceMail = async (order) => {
+    console.log(__dirname)
     try {
         const data = {
             "images": {
@@ -225,7 +226,7 @@ const createInvoiceMail = async (order) => {
             },
         };
         const fileName = order._id + '.pdf';
-        const filePath = path.join(__dirname, `../invoices/${fileName}`);
+        const filePath = path.join(__dirname, `invoices/${fileName}`);
         const result = await easyinvoice.createInvoice(data);
         await fs.writeFile(filePath, result.pdf, 'base64');
         return fileName;
