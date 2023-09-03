@@ -246,7 +246,7 @@ const sendOrderMail = async (orderDetails) => {
             invoice: orderDetails,
             link: `${process.env.NODE_ENV != 'production' ? process.env.BASE_URL_DEV : process.env.BASE_URL_PROD}/invoices/${fileName}`
         })
-        const filePath = path.join(__dirname, `../invoices/${fileName}`);
+        const filePath = path.join(__dirname, `/tmp/invoices/${fileName}`);
         const mailOptions = {
             from: '"The Bazaar Team" <order@bazaar.cptshredder.com>',
             to: orderDetails.user.email,
