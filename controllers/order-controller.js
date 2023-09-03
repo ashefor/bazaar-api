@@ -227,8 +227,10 @@ const createInvoiceMail = async (order) => {
         const fileName = order._id + '.pdf';
         // const filePath = path.join(__dirname, `invoices/${fileName}`);
         const result = await easyinvoice.createInvoice(data);
-        await fs.writeFile(`/invoices/${fileName}`, result.pdf, 'base64');
-        // await fs.writeFile(path.join(process.cwd(), 'invoices', fileName), result.pdf, 'base64');
+        // await fs.writeFile(`./invoices/${fileName}`, result.pdf, 'base64');
+
+        await fs.writeFile(path.join(__dirname, `/invoices/${fileName}`), result.pdf, 'base64');
+        // await fs.writeFile(path.join(process.cwd(), invoices), result.pdf, 'base64');
         return fileName;
     } catch (error) {
         throw error;
@@ -245,7 +247,7 @@ const sendOrderMail = async (orderDetails) => {
             invoice: orderDetails,
             link: `${process.env.NODE_ENV != 'production' ? process.env.BASE_URL_DEV : process.env.BASE_URL_PROD}/invoices/${fileName}`
         })
-        const filePath = path.join(__dirname, `./invoices/${fileName}`);
+        const filePath = path.join(__dirname, `../invoices/${fileName}`);
         const mailOptions = {
             from: '"The Bazaar Team" <order@bazaar.cptshredder.com>',
             to: orderDetails.user.email,
