@@ -42,12 +42,12 @@ const sendMail = async (token, email) => {
                     <p style="margin: 0px; line-height: 20px;">
                         <span class="size" style="font-size: 14px; margin: 0px; line-height: 20px;">To get started with using your account, verify your account by clicking on the below link:</span><br>
                     </p>
-                    <div><a href="http://localhost:4200/auth/verify-email/${token}/${email}"
+                    <div><a href="${process.env.BASE_URL_PROD}/auth/verify-email/${token}/${email}"
                             style="border: none; border-radius: 4px; color: #fff; cursor: pointer; display: inline-block; font-size: 14px; font-weight: bold; text-decoration: none; padding: 12px 24px; background-color: #1B3E71; margin: 20px 0 30px;">Verify
                             your account</a> <br></div>
 
                      <p style="margin: 0px 0px 30px; line-height: 20px;">
-                            <span class="size" style="font-size: 14px; margin: 0px 0px 30px; line-height: 20px;">or you can copy and paste the link below into your browser <a href="http://localhost:4200/auth/verify-email/${token}/${email}">http://localhost:4200/auth/verify-email/${token}/${email}</a> </span><br>
+                            <span class="size" style="font-size: 14px; margin: 0px 0px 30px; line-height: 20px;">or you can copy and paste the link below into your browser <a href="${process.env.BASE_URL_PROD}/auth/verify-email/${token}/${email}">${process.env.BASE_URL_PROD}/auth/verify-email/${token}/${email}</a> </span><br>
                         </p>
                     <p style="margin: 0px 0px 30px; line-height: 20px;">
                         <span class="size" style="font-size: 14px; margin: 0px 0px 30px; line-height: 20px;">If you'd like to know more about Bazaar or want to get in touch with us, get in touch with our customer support team.</span><br>
@@ -249,7 +249,7 @@ exports.resetPassword = async (req, res, next) => {
                     <div
                         style="display: flex; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px;">
                         <div
-                            style="background-image: url(http://localhost:4200/assets/images/ecommerce.png); background-repeat: no-repeat; background-position: center; height: 40px; width: 40px; margin-right: 10px;">
+                            style="background-image: url(${process.env.BASE_URL_PROD}/assets/images/ecommerce.png); background-repeat: no-repeat; background-position: center; height: 40px; width: 40px; margin-right: 10px;">
                             <br>
                         </div>
                         <h4 style="font-weight: normal; font-size: 24px; margin: 0;">Password Reset Instructions<br>
@@ -262,7 +262,7 @@ exports.resetPassword = async (req, res, next) => {
                     </p>
                     <p style="margin: 0px; line-height: 22px;">
                         <span class="colour" style="color:rgb(37, 55, 69)"><span class="size" style="font-size: 14px; margin: 0px; line-height: 22px;">Click on the below link to reset your password.</span></span><br>
-                    </p><a href="http://localhost:4200/auth/set-password/?token=${token}"
+                    </p><a href="${process.env.BASE_URL_PROD}/auth/set-password/?token=${token}"
                         style="border: none; border-radius: 4px; color: #fff; cursor: pointer; display: inline-block; font-size: 16px; padding: 15px 30px; background-color: #027EE6; text-decoration: none; margin: 25px 0;">Password
                         Reset</a>
                     <p style="margin: 0px 0px 30px; line-height: 22px;">
@@ -338,7 +338,7 @@ exports.setNewPassword = async (req, res, next) => {
   <div style="width: 100%; max-width: 550px; margin: auto; border-radius: 4px; ">
     <p style="margin-bottom: 25px;">Hello ${user.first_name}</p>
     <p style="margin-bottom: 25px;">
-      Congratulations! Your password has been successfully set. <a style="color:blueviolet; text-decoration: underline;" href="http://localhost:4200/auth/login">You can proceed to login with your new password here</a>.
+      Congratulations! Your password has been successfully set. <a style="color:blueviolet; text-decoration: underline;" href="${process.env.BASE_URL_PROD}/auth/login">You can proceed to login with your new password here</a>.
     </p>
     <hr style="margin: 25px 0;">
     <div>
