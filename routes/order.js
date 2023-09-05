@@ -1,7 +1,6 @@
 const express = require('express');
 
 const router = express.Router();
-const accountIdMiddleware = require('../middlewares/accoutId-middleware');
 const orderController = require('../controllers/order-controller');
 const isAuth = require('../middlewares/is-auth');
 
