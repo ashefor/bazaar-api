@@ -91,7 +91,6 @@ exports.signup = async (req, res, next) => {
             password: hashedPw,
             first_name: first_name,
             last_name: last_name,
-            accountId: cryto.randomUUID()
         });
         await user.save();
         const token = jwt.sign({
