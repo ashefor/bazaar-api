@@ -23,8 +23,12 @@ const cartRoutes = require('./routes/order');
 app.use(cors());
 app.use(bodyParser.json());
 app.use(fileUploadMiddleWare)
-app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use('/invoices', express.static(path.join(__dirname, '/tmp/invoices')));
+// app.use('/images', express.static(path.join(__dirname, 'images')));
+// app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
+const imagePublicDirectory = path.join(__dirname, '/images');
+const invoicesPublicDirectory = path.join(__dirname, '/invoices');
+app.use('/images', express.static(imagePublicDirectory));
+app.use('/invoices', express.static(invoicesPublicDirectory));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -50,7 +54,9 @@ app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ message: err.message, data: err.data });
 })
 
-mongoose.connect(process.env.DATABASE_URL).then(() => {
+mongoose.connect(process.env.DATABASE_URL, {
+    dbName: process.env.DBNAME
+}).then(() => {
     app.listen(process.env.PORT || 8000);
     console.log('Server running on port %s', process.env.PORT || 8000);
 }).catch(err => {
