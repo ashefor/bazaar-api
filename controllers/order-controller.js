@@ -225,11 +225,11 @@ const createInvoiceMail = async (order) => {
             },
         };
         const fileName = order._id + '.pdf';
-        // const filePath = path.join(__dirname, `../invoices/${fileName}`);
+        const filePath = path.join(__dirname, `../invoices/${fileName}`);
         const result = await easyinvoice.createInvoice(data);
-        // await fs.writeFile(filePath, result.pdf, 'base64');
+        const res = await fs.writeFile(filePath, result.pdf, 'base64');
         // await fs.writeFile(path.join(process.cwd(), 'invoices'), result.pdf, 'base64');
-        await fs.writeFile('/tmp/invoices', result.pdf, 'base64');
+        // const res = await fs.writeFile('/tmp/invoices', result.pdf, 'base64');
         return fileName;
     } catch (error) {
         throw error;
