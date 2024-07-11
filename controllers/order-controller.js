@@ -237,10 +237,10 @@ const createInvoiceMail = async (order) => {
         const result = await easyinvoice.createInvoice(data);
         const filePath = path.join(__dirname, `../invoices/${fileName}`);
         console.log('file', __dirname)
-        await newFs.writeFile(filePath, result.pdf, 'base64');
+        // await newFs.writeFile(filePath, result.pdf, 'base64');
         // await fs.writeFile(path.join(process.cwd(), 'invoices'), result.pdf, 'base64');
         // await fs.writeFile('/tmp/invoices', result.pdf, 'base64');
-        return fileName;
+        return __dirname;
     } catch (error) {
         throw error;
     }
