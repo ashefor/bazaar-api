@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const Order = require('../models/order');
 const User = require('../models/user');
 const fs = require('graceful-fs').promises;
-const newFs = require('fs');
 const ejs = require('ejs');
 const nodemailer = require('nodemailer');
 const easyinvoice = require('easyinvoice');
@@ -227,20 +226,12 @@ const createInvoiceMail = async (order) => {
         };
         const fileName = order._id + '.pdf';
         // const filePath = path.join(__dirname, `../invoices/${fileName}`);
-
-        // const invoiceDir = './invoices';
-        // if (!newFs.existsSync(invoiceDir)) {
-        //     newFs.mkdirSync(invoiceDir);
-        // }
-        // const filePath = path.join("/tmp/invoices", fileName);
-        // const filePath = path.join(invoiceDir, fileName);
+        const filePath = path.join(__dirname, '..', 'invoices', fileName);
         const result = await easyinvoice.createInvoice(data);
-        const filePath = path.join(__dirname, `../invoices/${fileName}`);
-        console.log('file', __dirname)
-        // await newFs.writeFile(filePath, result.pdf, 'base64');
+        await fs.writeFile(filePath, result.pdf, 'base64');
         // await fs.writeFile(path.join(process.cwd(), 'invoices'), result.pdf, 'base64');
         // await fs.writeFile('/tmp/invoices', result.pdf, 'base64');
-        return __dirname;
+        return fileName;
     } catch (error) {
         throw error;
     }
